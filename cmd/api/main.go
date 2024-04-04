@@ -35,14 +35,9 @@ func main() {
 		logger: logger,
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v1/healthcheck", app.healthcheck)
-	mux.HandleFunc("GET /v1/movies/{id}", app.showMovieHandler)
-	mux.HandleFunc("POST /v1/movies", app.createMovieHandler)
-
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      mux,
+		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
