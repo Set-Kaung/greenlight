@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -9,13 +9,29 @@ import (
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "creating a movie....")
+	// var input struct {
+	// 	Title   string   `json:"title"`
+	// 	Year    int32    `json:"year"`
+	// 	Runtime int32    `json:"runtime"`
+	// 	Genres  []string `json:"genres"`
+	// }
+	input := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelop{"movie": input}, nil)
+	if err != nil {
+		app.serverorErrorResponse(w, r, err)
+		return
+	}
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 	movie := data.Movie{
@@ -29,7 +45,6 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 
 	err = app.writeJSON(w, http.StatusOK, envelop{"movie": movie}, nil)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "The server encountered a problem and can't process your request right now", http.StatusInternalServerError)
+		app.serverorErrorResponse(w, r, err)
 	}
 }
