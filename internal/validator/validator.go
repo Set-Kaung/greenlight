@@ -24,6 +24,7 @@ func (v *Validator) AddError(key, message string) {
 	}
 }
 
+// if not ok, add key and message to validator errors
 func (v *Validator) Check(ok bool, key, message string) {
 	if !ok {
 		v.AddError(key, message)
@@ -43,6 +44,7 @@ func Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
 }
 
+// used in movie genres duplicate checking
 func Unique(values []string) bool {
 	uniqueValues := make(map[string]bool)
 	for _, val := range values {
